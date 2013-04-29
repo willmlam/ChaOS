@@ -46,7 +46,7 @@ public class CardWrapper {
 	}
 
 	public boolean addCard(Card c) {
-		if (cardName.equals(c.getCardName())) {
+		if (cardName.equals(c.getName())) {
 			if (dupCount < Card.getMaxInDeck(c)) {
 				dupCount++;
 				similarCards.add(c.clone());
@@ -61,7 +61,7 @@ public class CardWrapper {
 	}
 
 	public boolean containsCard(Card c) {
-		if (cardName.equals(c.getCardName()))
+		if (cardName.equals(c.getName()))
 			return true;
 		else
 			return false;

@@ -100,164 +100,6 @@ public class Importer {
 	 * serializingLists(); }
 	 */
 
-	public void scanRaw(File file) {
-		try {
-			scanner = new Scanner(file);
-			// System.out.println(file.exists() + " : " + file.getName());
-			int lineDex = 0;
-			boolean isStart = false;
-			Card newCard = new Card();
-			String fileName = file.getName().replace(".txt", "");
-			String temp = "";
-			boolean effectStart = true;
-
-			while (scanner.hasNext()) {
-
-				String str = scanner.nextLine().trim();
-				if (str.isEmpty() && isStart) {
-					// System.out.println("<START OF CARD>");
-					isStart = false;
-					lineDex = 0;
-					newCard = new Card();
-				} else if (str.equals("==========================")) {
-					// System.out.println("<END OF CARD>");
-					isStart = true;
-					// newCard.setImage(new File("FieldImages/Vertical.png"));
-					if (!new File("src" + newCard.getImageResource()).exists()) {
-						// if (newCard.getImage().exists()) {
-						// Card c = allCards.put(newCard.getCardName(),
-						// newCard);
-						newCard.setImageResource("/resources/FieldImages/cardBack-s.jpg");	
-					}
-					System.out.println(newCard.getImageResource());
-					Card c = allCards.put(newCard.getID(), newCard);
-					if (c == null) {
-						setCards.add(newCard);
-
-					} else {
-						// c.setID(newCard.getID());
-						// allCards.put(newCard.getCardName(), c);
-						allCards.put(newCard.getID(), c);
-						// if (!c.getImage().exists()) {
-						// setCards.remove(c);
-						// setCards.add(newCard);
-						// }
-					}
-
-				} else if (str.isEmpty() && !isStart) {
-				} else {
-
-					switch (lineDex) {
-					case 0: // card name
-						str = rename(str);
-						newCard.setCardName(str);
-						str = "Title: " + str;
-						break;
-					case 1: // card id
-						str = str.replace("  ", " ");
-						newCard.setID(str);
-						newCard.setImageResource("/resources/FieldImages/"
-								+ fileName + "/"
-								+ str.replace(" ", "_").replace("/", "-")
-								+ ".jpg");
-						/*
-						 * newCard.setImage(new
-						 * File("src/resources/FieldImages/" + fileName + "/" +
-						 * str.replace(" ", "_").replace("/", "-") + ".jpg"));
-						 */
-						str = "ID: " + str;
-						break;
-					case 2: // card classification
-						temp = str.substring("Type: ".length());
-						if (temp.equalsIgnoreCase("climax")) {
-							newCard.setT(Type.CLIMAX);
-						} else if (temp.equalsIgnoreCase("event")) {
-							newCard.setT(Type.EVENT);
-						} else if (temp.equalsIgnoreCase("character")) {
-							newCard.setT(Type.CHARACTER);
-						}
-						break;
-					case 3:
-						temp = str.substring("Level: ".length());
-						if (!temp.equalsIgnoreCase("N/A"))
-							newCard.setLevel(Integer.parseInt(temp));
-						break;
-					case 4:
-						temp = str.substring("Color: ".length());
-						if (temp.equalsIgnoreCase("blue")) {
-							newCard.setC(CCode.BLUE);
-						} else if (temp.equalsIgnoreCase("red")) {
-							newCard.setC(CCode.RED);
-						} else if (temp.equalsIgnoreCase("yellow")) {
-							newCard.setC(CCode.YELLOW);
-						} else if (temp.equalsIgnoreCase("green")) {
-							newCard.setC(CCode.GREEN);
-						}
-						break;
-					case 5:
-						temp = str.substring("Cost: ".length());
-						if (!temp.equalsIgnoreCase("N/A"))
-							newCard.setCost(Integer.parseInt(temp));
-						break;
-					case 6:
-						try {
-							temp = str.substring("Trigger: ".length());
-							if (!temp.equalsIgnoreCase(""))
-								newCard.setTrigger(Trigger.convertString(temp));
-						} catch (StringIndexOutOfBoundsException e) {
-							newCard.setTrigger(Trigger.NONE);
-						}
-						break;
-					case 7:
-						temp = str.substring("Power: ".length());
-						if (!temp.equalsIgnoreCase("N/A"))
-							newCard.setPower(Integer.parseInt(temp));
-						break;
-					case 8:
-						temp = str.substring("Soul: ".length());
-						if (!temp.equalsIgnoreCase("N/A"))
-							newCard.setSoul(Integer.parseInt(temp));
-						break;
-					case 9:
-						str = str.replace("::", ":");
-						int breaker = -1;
-						if (str.contains("_"))
-							breaker = str.indexOf("_");
-						str = str.replace("_", " ");
-
-						if (breaker > -1) {
-							newCard.setTrait1(str.substring(0, breaker - 1)
-									.trim());
-							newCard.setTrait2(str.substring(breaker).trim());
-						} else {
-							newCard.setTrait1(str.substring(0, str.length() - 1));
-							newCard.setTrait2("N/A");
-						}
-						break;
-					case 10:
-						effectStart = true;
-						break;
-					default:
-						if (str.equalsIgnoreCase("Flavor Text:")) {
-							effectStart = false;
-
-						} else if (effectStart) {
-							newCard.addEffect(str);
-						} else {
-							newCard.setFlavorText(str);
-						}
-						break;
-					}
-					// System.out.println(lineDex + " : " + str);
-
-					lineDex++;
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
 
 	private String rename(String str) throws IOException {
 		String resultString = str.charAt(0) + "";
@@ -316,29 +158,9 @@ public class Importer {
 
 	}
 	
-	public static void loadfromTxt() {
-		Importer importer = new Importer();
-		File file = new File("Data");
-		if (file.isDirectory()) {
-			String[] fileSet = file.list();
-			for (int i = 0; i < fileSet.length; i++) {
-				if (fileSet[i].endsWith(".txt")) {
-					System.out.println(fileSet[i]);
-					importer.scanRaw(new File("Data/" + fileSet[i]));
-				}
-			}
-		}
-		System.out.println("# of cards = " + setCards.size());
-		System.out.println("# of cards in binder = " + allCards.size());
-		Collections.sort(setCards);
-		System.out.println(System.getProperty("os.name"));
-		importer.serializingLists();
-		importer.close();
-	}
-	
 	public static void loadFromSQLiteDB() throws SQLiteException {
 		Importer importer = new Importer();
-		SQLiteConnection db = new SQLiteConnection(new File("CardData.sqlite"));
+		SQLiteConnection db = new SQLiteConnection(new File("ChaOS_DB.sqlite"));
 		db.open();
 		
 		HashMap<String,Integer> fieldMap = new HashMap<String,Integer>();
@@ -353,32 +175,44 @@ public class Importer {
 		st.dispose();
 		
 //		private String id;
+//		private String rarity;
 //		private String pID;
-//		private String cardName;
-//		private String cardName_e;
-//		private int dupCount = 0;
-//		private ArrayList<String> effects;
-//		private ArrayList<String> effects_e;
-//		private int power;
-//		private Trigger trigger;
-//		private int level;
-//		private int cost;
-//		private int soul;
+//		private String name;
+//		private String name_kana;
+//		private String name_e;
 //		private Type t;
-//		private CCode c;
-//		private String trait1;
-//		private String trait2;
-//		private String trait1_e;
-//		private String trait2_e;
+//		private int attack;
+//		private int defense;
+//		private int attackComp;
+//		private int defenseComp;
+//		private String gender;
+//		private String gender_e;
+//		private String element;
+//		private String element_e;
+//		private ArrayList<String> rule;
+//		private ArrayList<String> rule_e;
 //		private String flavorText;
 //		private String flavorText_e;
+//		private String expansion;
+//		private String expansion_e;
+//		private String series;
+//		private String series_e;
 		
 		st = db.prepare("SELECT * from cardtable");
 		while (st.step()) {
 			Card c = new Card();
 			
-			c.setCardName(st.columnString(fieldMap.get("name")));
-			c.setCardName_e(st.columnString(fieldMap.get("name_e")));
+			c.setName(st.columnString(fieldMap.get("name")));
+			c.setName_e(st.columnString(fieldMap.get("name_e")));
+			c.setName_kana(st.columnString(fieldMap.get("name_kana")));
+			c.setGender(st.columnString(fieldMap.get("gender")));
+			c.setGender_e(st.columnString(fieldMap.get("gender_e")));
+			c.setElement(st.columnString(fieldMap.get("element")));
+			c.setElement_e(st.columnString(fieldMap.get("element_e")));
+			c.setExpansion(st.columnString(fieldMap.get("expansion")));
+			c.setExpansion_e(st.columnString(fieldMap.get("expansion_e")));
+			c.setSeries(st.columnString(fieldMap.get("series")));
+			c.setSeries_e(st.columnString(fieldMap.get("series_e")));
 			
 			s = new Scanner(st.columnString(fieldMap.get("rule")));
 			while (s.hasNextLine()) {
@@ -391,72 +225,52 @@ public class Importer {
 			}
 			
 			String temp = st.columnString(fieldMap.get("type"));
-			if (temp.equalsIgnoreCase("climax")) {
-				c.setT(Type.CLIMAX);
+			if (temp.equalsIgnoreCase("chara")) {
+				c.setT(Type.CHARA);
+			} else if (temp.equalsIgnoreCase("extra")) {
+				c.setT(Type.EXTRA);
 			} else if (temp.equalsIgnoreCase("event")) {
 				c.setT(Type.EVENT);
-			} else if (temp.equalsIgnoreCase("character")) {
-				c.setT(Type.CHARACTER);
+			} else if (temp.equalsIgnoreCase("set")) {
+				c.setT(Type.SET);
+			} else if (temp.equalsIgnoreCase("partner")) {
+				c.setT(Type.PARTNER);
 			}
 			
-			c.setTrigger(Trigger.convertString(st.columnString(fieldMap.get("trigger"))));
 
-			if (c.getT() == Type.CLIMAX || c.getT() == Type.EVENT) {
-				assert(st.columnString(fieldMap.get("power")).equals("N/A"));
-				assert(st.columnString(fieldMap.get("soul")).equals("N/A"));
-				c.setPower(-1);
-				c.setSoul(-1);
+			if (c.getT() == Type.EVENT || c.getT() == Type.SET) {
+				c.setAttack(-1);
+				c.setDefense(-1);
 			}
 			else {
-				c.setPower(st.columnInt(fieldMap.get("power")));
-				c.setSoul(st.columnInt(fieldMap.get("soul")));
+				c.setAttack(st.columnInt(fieldMap.get("attack")));
+				c.setDefense(st.columnInt(fieldMap.get("defense")));
+				c.setAttackComp(st.columnInt(fieldMap.get("attackcomp")));
+				c.setDefenseComp(st.columnInt(fieldMap.get("defensecomp")));
 			}
-			
-			if (c.getT() == Type.CLIMAX) {
-				assert(st.columnString(fieldMap.get("level")).equals("N/A"));
-				assert(st.columnString(fieldMap.get("cost")).equals("N/A"));
-				c.setLevel(-1);
-				c.setCost(-1);
-			}
-			else {
-				c.setLevel(st.columnInt(fieldMap.get("level")));
-				c.setCost(st.columnInt(fieldMap.get("cost")));
-			}
-			
-			temp = st.columnString(fieldMap.get("color"));
-			if (temp.equalsIgnoreCase("blue")) {
-				c.setC(CCode.BLUE);
-			} else if (temp.equalsIgnoreCase("red")) {
-				c.setC(CCode.RED);
-			} else if (temp.equalsIgnoreCase("yellow")) {
-				c.setC(CCode.YELLOW);
-			} else if (temp.equalsIgnoreCase("green")) {
-				c.setC(CCode.GREEN);
-			}
-			
-			c.setTrait1(st.columnString(fieldMap.get("trait1")));
-			c.setTrait1_e(st.columnString(fieldMap.get("trait1_e")));
-			c.setTrait2(st.columnString(fieldMap.get("trait2")));
-			c.setTrait2_e(st.columnString(fieldMap.get("trait2_e")));
 			
 			c.setFlavorText(st.columnString(fieldMap.get("flavor")));
 			c.setFlavorText_e(st.columnString(fieldMap.get("flavor_e")));
 			
 			String setid = st.columnString(fieldMap.get("setid"));
 			String imagefilename = st.columnString(fieldMap.get("imagefilename"));
-			c.setImageResource("/resources/FieldImages/" + setid.split("/")[1] + "/" + imagefilename);
-			System.out.println(c.getImageResource());
-			
-			String cid = st.columnString(fieldMap.get("cardid"));
-			c.setID((c.isAlternateArt() ? cid + "_alt" : cid));
-			
+			if (imagefilename.equals("chaos_00.jpg")) {
+				c.setImageResource("/resources/cardimages/chaos_00.jpg");	
+			}
+			else {
+				c.setImageResource("/resources/cardimages/" + setid + "/" + imagefilename);
+			}
 			if (!new File("src" + c.getImageResource()).exists()) {
 				// if (newCard.getImage().exists()) {
 				// Card c = allCards.put(newCard.getCardName(),
 				// newCard);
-				c.setImageResource("/resources/FieldImages/cardBack-s.jpg");	
+				c.setImageResource("/resources/cardimages/chaos_00.jpg");	
 			}
 			System.out.println(c.getImageResource());
+			
+			c.setID(st.columnString(fieldMap.get("cardid")));
+			c.setRarity(st.columnString(fieldMap.get("rarity")));
+			//c.setID((c.isAlternateArt() ? cid + "_alt" : cid));
 			Card cc = allCards.put(c.getID(), c);
 			if (cc == null) {
 				setCards.add(c);

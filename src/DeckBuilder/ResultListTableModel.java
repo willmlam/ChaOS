@@ -10,12 +10,13 @@ public class ResultListTableModel extends AbstractTableModel {
 	
 	private static final long serialVersionUID = 3975544447965529587L;
 	
-	private String[] columnNames = { "ID", "Name", "Color", "Type", "Level",
-			"Cost", "Soul", "Power" };	
-	private Class<?>[] types = {String.class, 
+	private String[] columnNames = { "ID", "Name", "Type", "Gen", "Elem", "ATK", "DEF", "AC", "DC"};
+	private Class<?>[] types = {
 			String.class, 
-			CCode.class, 
+			String.class, 
 			Type.class,
+			String.class, 
+			String.class, 
 			Integer.class,
 			Integer.class,
 			Integer.class,
@@ -52,21 +53,23 @@ public class ResultListTableModel extends AbstractTableModel {
 		Card c = cardlist.get(rowIndex);
 		switch (columnIndex) {
 		case 0:
-			return c.getID();
+			return c.getID() + " " + c.getRarity();
 		case 1:
-			return c.getCardName();
+			return c.getName();
 		case 2:
-			return c.getC();
-		case 3:
 			return c.getT();
+		case 3:
+			return c.getGender();
 		case 4:
-			return c.getLevel();
+			return c.getElement();
 		case 5:
-			return c.getCost();
+			return c.getAttack();
 		case 6:
-			return c.getSoul();
+			return c.getDefense();
 		case 7:
-			return c.getPower();
+			return c.getAttackComp();
+		case 8:
+			return c.getDefenseComp();
 		default:
 			return null;
 		}

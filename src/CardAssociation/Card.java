@@ -27,8 +27,10 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.awt.Component;
 
 import javax.imageio.ImageIO;
+import javax.swing.Box;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -46,37 +48,46 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 	// private static final long serialVersionUID = 5876059325645604130L;
 	// private static final long serialVersionUID = 5876059325645604131L;
 	private static final long serialVersionUID = 5876059325645604132L;
+	
+	private int dupCount = 0;
 
 	// card properties
 	private String[] sameID;
 	private String id;
+	private String rarity;
 	private String pID;
-	private String cardName;
-	private String cardName_e;
-	private int dupCount = 0;
-	private ArrayList<String> effects;
-	private ArrayList<String> effects_e;
-	private int power;
-	private Trigger trigger;
-	private int level;
-	private int cost;
-	private int soul;
+	private String name;
+	private String name_kana;
+	private String name_e;
 	private Type t;
-	private CCode c;
-	private String trait1;
-	private String trait2;
-	private String trait1_e;
-	private String trait2_e;
+	private int attack;
+	private int defense;
+	private int attackComp;
+	private int defenseComp;
+	private String gender;
+	private String gender_e;
+	private String element;
+	private String element_e;
+	private ArrayList<String> rule;
+	private ArrayList<String> rule_e;
 	private String flavorText;
 	private String flavorText_e;
+	private String expansion;
+	private String expansion_e;
+	private String series;
+	private String series_e;
+	
+	
 	private String realCardName;
 	private ArrayList<Attribute> attributes;
 	private ArrayList<Card> associatedCards;
 	private boolean isAlternateArt;
 
+	/*
 	// game play properties
 	private State currentState;
 	private Zone currentZone;
+	*/
 
 	// other properties
 	private String imageResource;
@@ -133,7 +144,7 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-		System.out.println("Cardv2.java:clicked " + cardName);
+		System.out.println("Cardv2.java:clicked " + name);
 	}
 
 	@Override
@@ -148,8 +159,8 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 
 	@Override
 	public void mousePressed(MouseEvent arg0) {
-		System.out.println("Cardv2.java:pressed cardName = " + cardName);
-		System.out.println("Cardv2.java:pressed name = " + getCardName());
+		System.out.println("Cardv2.java:pressed cardName = " + name);
+		System.out.println("Cardv2.java:pressed name = " + getName());
 		JComponent comp = (JComponent) arg0.getSource();
 		TransferHandler handler = comp.getTransferHandler();
 		handler.exportAsDrag(comp, arg0, TransferHandler.COPY);
@@ -171,15 +182,14 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 		}
 		setID(id);
 		// setName(id);
-		setCardName(name);
+		setName(name);
 
 		realCardName = name;
 
-		effects = new ArrayList<String>();
-		effects_e = new ArrayList<String>();
+		rule = new ArrayList<String>();
+		rule_e = new ArrayList<String>();
 		flavorText = "";
 		flavorText_e = "";
-		setCurrentState(State.NONE);
 		// imageFile = new File("FieldImages/cardBack-s.jpg");
 		imageResource = "/resources/FieldImages/cardBack-s.jpg";
 		backResource = "/resources/FieldImages/cardBack-s.jpg";
@@ -190,11 +200,10 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 
 	// create a card
 	public Card() {
-		effects = new ArrayList<String>();
-		effects_e = new ArrayList<String>();
+		rule = new ArrayList<String>();
+		rule_e = new ArrayList<String>();
 		flavorText = "";
 		flavorText_e = "";
-		setCurrentState(State.NONE);
 		sameID = new String[MINILEN];
 		for (int i = 0; i < sameID.length; i++) {
 			sameID[i] = "";
@@ -243,7 +252,7 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 			// Image image = ImageIO.read((imageFile.toURI()).toURL());
 			// ImageIcon img = new ImageIcon(image);
 
-			ImageIcon img = new ImageIcon(image.getScaledInstance((int) (image.getWidth(null) * 0.44), (int) (image.getHeight(null) * 0.44), Image.SCALE_SMOOTH));
+			ImageIcon img = new ImageIcon(image.getScaledInstance((int) (image.getWidth(null) *0.5 * 0.44), (int) (image.getHeight(null) *0.5 * 0.44), Image.SCALE_SMOOTH));
 
 			imageLabel.setIcon(img);
 		} catch (MalformedURLException e) {
@@ -280,31 +289,14 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 
 		GroupLayout layout = new GroupLayout(infoPanel);
 		infoPanel.setLayout(layout);
-		layout.setAutoCreateGaps(true);
-		layout.setAutoCreateContainerGaps(true);
 
 		JTextArea description = new JTextArea(10, 10);
-		if (c == CCode.RED)
-			description.setBackground(Color.PINK);
-		else if (c == CCode.BLUE)
-			description.setBackground(Color.CYAN);
-		else if (c == CCode.YELLOW)
-			description.setBackground(Color.YELLOW);
-		else if (c == CCode.GREEN)
-			description.setBackground(Color.GREEN);
 		// description.setFont(font);
 		description.setLineWrap(true);
 		description.setWrapStyleWord(true);
 		description.setEditable(false);
 
 		String cardText = "";
-		if (t == Type.CHARACTER) {
-			if (!getTrait1_j().equals(""))
-				cardText += getTrait1();
-			if (!getTrait2_j().equals(""))
-				cardText += (!cardText.equals("") ? " | " : "") + getTrait2();
-			cardText += "\n\n";
-		}
 		cardText += getEffects() + "\n";
 
 		if (!getFlavorText().equals("")) {
@@ -316,49 +308,108 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 		description.setCaretPosition(0);
 		JScrollPane descContainer = new JScrollPane(description);
 
-		JLabel nameLabel = new JLabel();
+		JLabel nameLabel = new JLabel(name);
 		// nameLabel.setFont(font);
-		nameLabel.setText(cardName);
-
-		JLabel idLabel = new JLabel(id.replace("_alt", ""));
+		JLabel idLabel = new JLabel(id + " " + rarity);
 		// idLabel.setFont(font);
 		JLabel typeLabel = new JLabel(t.toString());
 		// typeLabel.setFont(font);
-		JLabel levelLabel = new JLabel("Level: " + (level >= 0 ? level : " -"));
-		// levelLabel.setFont(font);
-		JLabel costLabel = new JLabel("Cost: " + (cost >= 0 ? cost : " -"));
-		// costLabel.setFont(font);
-		JLabel soulLabel = new JLabel("Trigger: " + trigger.toString());
-		// soulLabel.setFont(font);
-		JLabel powerLabel = new JLabel("Power: " + (power > 0 ? power : " -"));
-		// powerLabel.setFont(font);
-		JLabel damageLabel = new JLabel("Soul: " + (soul > 0 ? soul : " -"));
-		// damageLabel.setFont(font);
+		JLabel genderTextLabel = new JLabel("Gender:  " + gender);
+		JLabel elementTextLabel = new JLabel("Element:  " + element);
+		String attackString = "" + (attack >= 0 ? String.valueOf(attack) : "-");
+		String defenseString = "" + (defense >= 0 ? String.valueOf(defense) : "-");
+		String attackCompString;
+		if (attackComp != 0) {
+			attackCompString = attackComp < 0 ? String.valueOf(attackComp) : "+" + String.valueOf(attackComp);
+		} else {
+			attackCompString = "-";
+		}
+		String defenseCompString;
+		if (defenseComp != 0) {
+			defenseCompString = defenseComp < 0 ? String.valueOf(defenseComp) : "+" + String.valueOf(defenseComp);
+		} else {
+			defenseCompString = "-";
+		}
+		JLabel attackTextLabel = new JLabel("ATK:");
+		JLabel defenseTextLabel = new JLabel("DEF:");
+		JLabel attackLabel = new JLabel(attackString);
+		attackLabel.setHorizontalAlignment(JLabel.RIGHT);
+		JLabel defenseLabel = new JLabel(defenseString);
+		defenseLabel.setHorizontalAlignment(JLabel.RIGHT);
+		JLabel attackCompLabel = new JLabel(attackCompString);
+		attackCompLabel.setHorizontalAlignment(JLabel.RIGHT);
+		JLabel defenseCompLabel = new JLabel(defenseCompString);
+		defenseCompLabel.setHorizontalAlignment(JLabel.RIGHT);
+		
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
+		
+		Component spacer = Box.createHorizontalStrut(15);
+		
+		GroupLayout.ParallelGroup hGroup = layout.createParallelGroup();
+		hGroup
+			.addComponent(nameLabel)
+			.addGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+						.addComponent(idLabel,GroupLayout.PREFERRED_SIZE,100,GroupLayout.PREFERRED_SIZE)
+						.addComponent(genderTextLabel,GroupLayout.PREFERRED_SIZE,100,GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(typeLabel)
+						.addComponent(elementTextLabel,GroupLayout.PREFERRED_SIZE,90,GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(attackTextLabel))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(attackLabel,GroupLayout.PREFERRED_SIZE,15,GroupLayout.PREFERRED_SIZE)
+						.addComponent(attackCompLabel,GroupLayout.PREFERRED_SIZE,15,GroupLayout.PREFERRED_SIZE))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(spacer))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(defenseTextLabel))
+				.addGroup(layout.createParallelGroup()
+						.addComponent(defenseLabel,GroupLayout.PREFERRED_SIZE,15,GroupLayout.PREFERRED_SIZE)
+						.addComponent(defenseCompLabel,GroupLayout.PREFERRED_SIZE,15,GroupLayout.PREFERRED_SIZE))
+						)
+			.addComponent(descContainer);
+//			);
+				
+		layout.setHorizontalGroup(hGroup);
+		
+		GroupLayout.SequentialGroup vGroup = layout.createSequentialGroup();
+		vGroup
+		.addGroup(layout.createParallelGroup().addComponent(nameLabel))
+		.addGroup(layout.createParallelGroup().addComponent(idLabel).addComponent(typeLabel).addComponent(attackTextLabel).addComponent(attackLabel)
+				.addComponent(spacer).addComponent(defenseTextLabel).addComponent(defenseLabel))
+		.addGroup(layout.createParallelGroup().addComponent(genderTextLabel)
+				.addComponent(elementTextLabel).addComponent(attackCompLabel).addComponent(defenseCompLabel))
+		.addGroup(layout.createParallelGroup().addComponent(descContainer));
+		
 
+		/*
 		layout.setHorizontalGroup(layout
 				.createParallelGroup()
 				.addComponent(nameLabel, GroupLayout.PREFERRED_SIZE, 350, GroupLayout.PREFERRED_SIZE)
 				.addGroup(
 						layout.createSequentialGroup()
 								.addGroup(
-										layout.createParallelGroup().addGroup(layout.createSequentialGroup().addComponent(idLabel, GroupLayout.PREFERRED_SIZE, 125, GroupLayout.PREFERRED_SIZE))
-												.addGroup(layout.createSequentialGroup().addComponent(levelLabel, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE).addComponent(costLabel)))
+										layout.createParallelGroup().addGroup(layout.createSequentialGroup()
+												.addComponent(idLabel, GroupLayout.PREFERRED_SIZE, 125, GroupLayout.PREFERRED_SIZE))
+												.addGroup(layout.createSequentialGroup()
+														.addComponent(genderLabel)
+														.addComponent(attackLabel)
+														.addComponent(attackCompLabel)))
 								.addGroup(
-										layout.createParallelGroup().addGroup(layout.createSequentialGroup().addComponent(typeLabel))
-												.addGroup(layout.createSequentialGroup().addComponent(powerLabel, GroupLayout.PREFERRED_SIZE, 90, GroupLayout.PREFERRED_SIZE)))
-								.addGroup(
-										layout.createParallelGroup().addGroup(layout.createSequentialGroup().addComponent(soulLabel, GroupLayout.PREFERRED_SIZE, 130, GroupLayout.PREFERRED_SIZE))
-												.addGroup(layout.createSequentialGroup().addComponent(damageLabel))))
+										layout.createParallelGroup().addGroup(layout.createSequentialGroup()
+												.addComponent(typeLabel))
+												.addGroup(layout.createSequentialGroup()
+														.addComponent(elementLabel)
+														.addComponent(defenseLabel)
+														.addComponent(defenseCompLabel))))
 				.addComponent(descContainer, GroupLayout.PREFERRED_SIZE, 350, GroupLayout.PREFERRED_SIZE));
+		*/
 
-		layout.setVerticalGroup(layout.createSequentialGroup().addGroup(layout.createParallelGroup().addComponent(nameLabel))
-				.addGroup(layout.createParallelGroup().addComponent(idLabel).addComponent(typeLabel).addComponent(soulLabel))
-				.addGroup(layout.createParallelGroup().addComponent(levelLabel).addComponent(costLabel).addComponent(powerLabel).addComponent(damageLabel))
-				.addGroup(layout.createParallelGroup().addComponent(descContainer)));
+		layout.setVerticalGroup(vGroup);
 
-		// System.out.println("getInfoPane");
+		System.out.println("getInfoPane");
 
 		return infoPanel;
 
@@ -371,9 +422,10 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 
 		try {
 			// Image image = ImageIO.read((imageFile.toURI()).toURL());
-			// System.out.println(getImageResource());
+			System.out.println(getImageResource());
 			Image image = ImageIO.read(getClass().getResourceAsStream(getImageResource()));
-			ImageIcon img = new ImageIcon(image);
+			ImageIcon img = new ImageIcon(image.getScaledInstance((int)(image.getWidth(null)*0.5), (int)(image.getHeight(null)*0.5),Image.SCALE_SMOOTH));
+
 			imagePane.add(new JLabel(img));
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -403,22 +455,22 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 	}
 
 	// set the card name of the card
-	public void setCardName(String name) {
-		this.cardName = name;
+	public void setName(String name) {
+		this.name = name;
 		setUniqueID(UUID.randomUUID());
 	}
 
 	// get the card name of the card
-	public String getCardName() {
-		return cardName;
+	public String getName() {
+		return name;
 	}
 
-	public void setCardName_e(String cardName_e) {
-		this.cardName_e = cardName_e;
+	public void setName_e(String name_e) {
+		this.name_e = name_e;
 	}
 
-	public String getCardName_e() {
-		return cardName_e;
+	public String getName_e() {
+		return name_e;
 	}
 
 	// get the card effects
@@ -434,8 +486,8 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 	public String getEffects_j() {
 		String result = "";
 
-		for (int i = 0; i < effects.size(); i++) {
-			result += effects.get(i) + "\n";
+		for (int i = 0; i < rule.size(); i++) {
+			result += rule.get(i) + "\n";
 		}
 
 		return result;
@@ -444,8 +496,8 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 	public String getEffects_e() {
 		String result = "";
 
-		for (int i = 0; i < effects_e.size(); i++) {
-			result += effects_e.get(i) + "\n";
+		for (int i = 0; i < rule_e.size(); i++) {
+			result += rule_e.get(i) + "\n";
 		}
 
 		return result;
@@ -454,120 +506,14 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 	// set the card effects
 	public void addEffect(String e) {
 		if (!e.isEmpty())
-			effects.add(e);
+			rule.add(e);
 		// TODO: process effects to make attributes
 	}
 
 	public void addEffect_e(String e) {
 		if (!e.isEmpty())
-			effects_e.add(e);
+			rule_e.add(e);
 		// TODO: process effects to make attributes
-	}
-
-	// set the power value of the card
-	public void setPower(int power) {
-		this.power = power;
-	}
-
-	// get the power value of the card
-	public int getPower() {
-		return power;
-	}
-
-	// set the soul count of the card
-	public void setSoul(int soul) {
-		this.soul = soul;
-	}
-
-	// get the soul count of the card
-	public int getSoul() {
-		return soul;
-	}
-
-	// set the color of the card
-	public void setC(CCode c) {
-		this.c = c;
-	}
-
-	// get the color of the card
-	public CCode getC() {
-		return c;
-	}
-
-	// set the first trait of the card
-	public void setTrait1(String trait1) {
-		this.trait1 = trait1;
-	}
-
-	public String getTrait1() {
-		return getTrait1_j() + " " + getTrait1_e();
-	}
-
-	// get the first trait of the card
-	public String getTrait1_j() {
-		return trait1;
-	}
-
-	// set the second trait of the card
-	public void setTrait2(String trait2) {
-		this.trait2 = trait2;
-	}
-
-	public String getTrait2() {
-		return getTrait2_j() + " " + getTrait2_e();
-	}
-
-	// get the second trait of the card
-	public String getTrait2_j() {
-		return trait2;
-	}
-
-	public void setTrait1_e(String trait1_e) {
-		this.trait1_e = trait1_e;
-	}
-
-	public String getTrait1_e() {
-		return trait1_e;
-	}
-
-	public void setTrait2_e(String trait2_e) {
-		this.trait2_e = trait2_e;
-	}
-
-	public String getTrait2_e() {
-		return trait2_e;
-	}
-
-	// set the level of the card
-	public void setLevel(int level) {
-		this.level = level;
-	}
-
-	// get the level of the card
-	public int getLevel() {
-		return level;
-	}
-
-	// set the cost of the card
-	public void setCost(int cost) {
-		this.cost = cost;
-	}
-
-	// get the cost of the card
-	public int getCost() {
-		return cost;
-	}
-
-	// set the trigger information of the card
-	public void setTrigger(Trigger trigger) {
-		this.trigger = trigger;
-		if (this.trigger == null)
-			this.trigger = Trigger.NONE;
-	}
-
-	// get the trigger information of the card
-	public Trigger getTrigger() {
-		return trigger;
 	}
 
 	// get the card type
@@ -580,6 +526,118 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 		return t;
 	}
 
+	public String getRarity() {
+		return rarity;
+	}
+
+	public void setRarity(String rarity) {
+		this.rarity = rarity;
+	}
+
+	public String getName_kana() {
+		return name_kana;
+	}
+
+	public void setName_kana(String name_kana) {
+		this.name_kana = name_kana;
+	}
+
+	public int getAttack() {
+		return attack;
+	}
+
+	public void setAttack(int attack) {
+		this.attack = attack;
+	}
+
+	public int getDefense() {
+		return defense;
+	}
+
+	public void setDefense(int defense) {
+		this.defense = defense;
+	}
+
+	public int getAttackComp() {
+		return attackComp;
+	}
+
+	public void setAttackComp(int attackComp) {
+		this.attackComp = attackComp;
+	}
+
+	public int getDefenseComp() {
+		return defenseComp;
+	}
+
+	public void setDefenseComp(int defenseComp) {
+		this.defenseComp = defenseComp;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public String getGender_e() {
+		return gender_e;
+	}
+
+	public void setGender_e(String gender_e) {
+		this.gender_e = gender_e;
+	}
+
+	public String getElement() {
+		return element;
+	}
+
+	public void setElement(String element) {
+		this.element = element;
+	}
+
+	public String getElement_e() {
+		return element_e;
+	}
+
+	public void setElement_e(String element_e) {
+		this.element_e = element_e;
+	}
+
+	public String getExpansion() {
+		return expansion;
+	}
+
+	public void setExpansion(String expansion) {
+		this.expansion = expansion;
+	}
+
+	public String getExpansion_e() {
+		return expansion_e;
+	}
+
+	public void setExpansion_e(String expansion_e) {
+		this.expansion_e = expansion_e;
+	}
+
+	public String getSeries() {
+		return series;
+	}
+
+	public void setSeries(String series) {
+		this.series = series;
+	}
+
+	public String getSeries_e() {
+		return series_e;
+	}
+
+	public void setSeries_e(String series_e) {
+		this.series_e = series_e;
+	}
+
 	public void resetCount() {
 		dupCount = 0;
 	}
@@ -589,23 +647,24 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 		dupCount--;
 	}
 
-	/**
-	 * Check to see if the card meets the requirements given
-	 * 
-	 * @param sId
-	 * @param sName
-	 * @param sColor
-	 * @param sType
-	 * @param sLevel
-	 * @param sCost
-	 * @param sTrigger
-	 * @param sPower
-	 * @param sSoul
-	 * @param sTrait
-	 * @param sAbility
-	 * @return
-	 */
-	public boolean meetsRequirement(String sId, String sName, CCode sColor, Type sType, int sLevel, int sCost, Trigger sTrigger, int sPower, int sSoul, String sTrait, String sAbility) {
+	public boolean meetsRequirement(
+			String sId, 
+			String sRarity, 
+			String sName, 
+			Type sType, 
+			String sGender, 
+			String sElement, 
+			int sMinAttack,
+			int sMaxAttack,
+			int sMinDefense,
+			int sMaxDefense,
+			int sMinAttackComp,
+			int sMaxAttackComp,
+			int sMinDefenseComp,
+			int sMaxDefenseComp,
+			String sExpansion,
+			String sSeries,
+			String sAbility) {
 
 		boolean isMet = true;
 
@@ -645,39 +704,36 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 		}
 
 		if (!sName.isEmpty()) {
-			isMet = isMet && (cardName.toLowerCase().contains(sName.toLowerCase()) || cardName_e.toLowerCase().contains(sName.toLowerCase()));
+			isMet = isMet && (name.toLowerCase().contains(sName.toLowerCase()) || name_e.toLowerCase().contains(sName.toLowerCase()));
 		}
-
-		if (sColor != null && sColor != CCode.ALL) {
-			isMet = isMet && (sColor == c);
+		
+		if (!sRarity.isEmpty()) {
+			isMet = isMet && (rarity.toLowerCase().equals(sRarity.toLowerCase()));
 		}
 
 		if (sType != null && sType != CardAssociation.Type.ALL) {
 			isMet = isMet && (sType == t);
 		}
-
-		if (sLevel > -1) {
-			isMet = isMet && (sLevel == level);
+		
+		if (!sGender.isEmpty()) {
+			isMet = isMet && (gender.toLowerCase().contains(sGender.toLowerCase()) || gender_e.contains(sGender));
 		}
-
-		if (sCost > -1) {
-			isMet = isMet && (sCost == cost);
+		
+		if (!sElement.isEmpty()) {
+			isMet = isMet && (element.toLowerCase().contains(sElement.toLowerCase()) || element_e.contains(sElement));
 		}
+		
+		isMet = isMet && (sMinAttack <= attack) && (attack <= sMaxAttack);
+		isMet = isMet && (sMinDefense <= defense) && (defense <= sMaxDefense);
+		isMet = isMet && (sMinAttackComp <= attackComp) && (attackComp <= sMaxAttackComp);
+		isMet = isMet && (sMinDefenseComp <= defenseComp) && (defenseComp <= sMaxDefenseComp);
 
-		if (sTrigger != null && sTrigger != Trigger.ALL) {
-			isMet = isMet && (sTrigger == trigger);
+		if (!sExpansion.isEmpty()) {
+			isMet = isMet && (expansion.toLowerCase().contains(sExpansion) || expansion_e.toLowerCase().contains(sExpansion));
 		}
-
-		if (sPower > -1) {
-			isMet = isMet && (sPower == power);
-		}
-
-		if (sSoul > -1) {
-			isMet = isMet && (sSoul == soul);
-		}
-
-		if (!sTrait.isEmpty()) {
-			isMet = isMet && (trait1.toLowerCase().contains(sTrait) || trait2.toLowerCase().contains(sTrait) || trait1_e.toLowerCase().contains(sTrait) || trait2_e.toLowerCase().contains(sTrait));
+		
+		if (!sSeries.isEmpty()) {
+			isMet = isMet && (series.toLowerCase().contains(sSeries) || series_e.toLowerCase().contains(sSeries));
 		}
 
 		if (!sAbility.isEmpty()) {
@@ -721,22 +777,21 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 	}
 
 	public Card clone() {
-		Card cloned = new Card(id, cardName);
+		Card cloned = new Card(id, name);
 
+		cloned.setRarity(rarity);
 		cloned.setCount(dupCount);
-		cloned.setEffects(effects);
-		cloned.setEffects_e(effects_e);
-		cloned.setPower(power);
-		cloned.setTrigger(trigger);
-		cloned.setLevel(level);
-		cloned.setCost(cost);
-		cloned.setSoul(soul);
+		cloned.setEffects(rule);
+		cloned.setEffects_e(rule_e);
+		cloned.setGender(gender);
+		cloned.setGender_e(gender_e);
+		cloned.setElement(element);
+		cloned.setElement_e(element_e);
+		cloned.setAttack(attack);
+		cloned.setDefense(defense);
+		cloned.setAttackComp(attackComp);
+		cloned.setDefenseComp(defenseComp);
 		cloned.setT(t);
-		cloned.setC(c);
-		cloned.setTrait1(trait1);
-		cloned.setTrait1_e(trait1_e);
-		cloned.setTrait2(trait2);
-		cloned.setTrait2_e(trait2_e);
 		cloned.setFlavorText(flavorText);
 		cloned.setFlavorText_e(flavorText_e);
 		cloned.setImageResource(imageResource);
@@ -744,139 +799,14 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 		return cloned;
 	}
 
-	private void setEffects(ArrayList<String> effects) {
-		this.effects = effects;
+	private void setEffects(ArrayList<String> rule) {
+		this.rule = rule;
 	}
 
-	private void setEffects_e(ArrayList<String> effects_e) {
-		this.effects_e = effects_e;
+	private void setEffects_e(ArrayList<String> rule_e) {
+		this.rule_e = rule_e;
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * *
-	 * Game Play Property Setting and Creation *
-	 */
-
-	// private Rectangle cardBound;
-	Canvas customCanvas = null;
-
-	public Zone getCurrentZone() {
-		return currentZone;
-	}
-
-	public void setCurrentZone(Zone currentZone) {
-		this.currentZone = currentZone;
-	}
-
-	// used in Game.java to set the current state of the card
-	public void setCurrentState(State currentState) {
-		this.currentState = currentState;
-	}
-
-	// used in Game.java to get the current state of the card
-	public State getCurrentState() {
-		return currentState;
-	}
-
-	public Rectangle getCardBound() {
-		Rectangle boundBox = new Rectangle();
-		boundBox.setBounds((int) customCanvas.getLocation().x, (int) (customCanvas.getLocation().y + Game.Game.translatedY), customCanvas.getWidth(), customCanvas.getHeight());
-
-		return boundBox;
-	}
-
-	public Image getCardImage() throws MalformedURLException, IOException {
-		return ImageIO.read(getClass().getResourceAsStream(getImageResource()));
-	}
-
-	public Canvas toCanvas() {
-		if (customCanvas == null) {
-			customCanvas = new Canvas() {
-				private static final long serialVersionUID = 932367309486409810L;
-
-				public void paint(Graphics g) {
-					Image after;
-					try {
-
-						// img = ImageIO.read((imageFile.toURI()).toURL());
-
-						BufferedImage before = ImageIO.read(getClass().getResourceAsStream(getImageResource()));
-
-						if (currentState == State.FD_REST || currentState == State.FD_STAND) {
-							before = ImageIO.read(getClass().getResourceAsStream(backResource));
-						}
-						/*
-						 * BufferedImage before =
-						 * ImageIO.read((imageFile.toURI()) .toURL());
-						 */
-						int wid = before.getWidth();
-						int hit = before.getHeight();
-						after = new BufferedImage(wid, hit, BufferedImage.TYPE_INT_ARGB);
-
-						AffineTransform at = new AffineTransform();
-
-						at.scale(Game.Game.gameScale, Game.Game.gameScale);
-
-						if (currentState == State.REST || currentState == State.FD_REST) {
-							at.translate((after.getHeight(null) - before.getWidth(null)) / 2, (after.getWidth(null) - before.getHeight(null)) / 2);
-							if(getT() == Type.CLIMAX) {
-								at.rotate(Math.toRadians(-90), before.getWidth(null) / 2, before.getHeight(null) / 2);
-							} else {
-								at.rotate(Math.toRadians(90), before.getWidth(null) / 2, before.getHeight(null) / 2);
-							}
-						}
-						else if (currentState == State.REVERSE) {
-							at.rotate(Math.toRadians(180), before.getWidth(null) / 2, before.getHeight(null) / 2);
-						}
-
-						AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-						after = scaleOp.filter(before, null);
-
-						// prepareImage(img, null);
-						g.drawImage(after, getLocation().x, getLocation().y, null);
-						customCanvas.setBounds(getLocation().x, getLocation().y, (int) (after.getWidth(null)), (int) (after.getHeight(null)));
-
-						boolean debug = false;
-
-						String outputString = (int) getCardBound().getX() + " + " + getCardBound().width + "," + (int) getCardBound().getY() + " + " + getCardBound().height;
-						if (debug) {
-							g.setColor(Color.BLUE);
-							g.fillRect((int) getCardBound().getX(), (int) getCardBound().getY(), getCardBound().width, getCardBound().height);
-							g.setColor(Color.RED);
-							g.drawRect((int) getCardBound().getX(), (int) getCardBound().getY(), getCardBound().width, getCardBound().height);
-							g.setColor(Color.BLACK);
-
-							g.drawString(outputString, (int) getCardBound().getX(), (int) getCardBound().getY());
-						}
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
-				}
-
-				public void update(Graphics g) {
-					paint(g);
-				}
-
-			};
-		}
-
-		return customCanvas;
-	}
-
-	public void setDisplay(boolean isFaceUp, boolean isTapped) {
-
-		// if(isFaceUp && isTapped)
-		// currentState = State.REST;
-		// else if(isFaceUp && !isTapped)
-		// currentState = State.STAND;
-		// else if(!isFaceUp && isTapped)
-		// currentState = State.FD_REST;
-		// else
-		// currentState = State.FD_STAND;
-
-	}
 
 	// Hard code special cases where you may put >4 cards in the deck
 	// FZ/SE13-24 C
@@ -888,17 +818,11 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 	// FT/SE10-29
 
 	public static int getMaxInDeck(Card c) {
-		if (c.getID().equals("FZ/SE13-24 C") || c.getID().equals("FZ/SE13-26 C") || c.getID().equals("MF/S13-034 U") || c.getID().equals("MF/S13-040 C") || c.getID().equals("ID/W10-014 C")
-				|| c.getID().equals("SG/W19-038 C"))
-			return 50;
-		else if (c.getID().contains("FT/SE10-29"))
-			return 6;
-		else
-			return 4;
+		return 4;
 	}
 
 	public String toString() {
-		return cardName;
+		return name;
 	}
 
 	public void setAlternateArt(boolean isAlternateArt) {

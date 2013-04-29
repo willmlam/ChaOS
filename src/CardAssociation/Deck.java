@@ -30,26 +30,21 @@ public class Deck {
 	// deck properties
 	private String deckName;
 	public static final int MAX_DECK_SIZE = 50;
+	public static final int MAX_EXTRA_DECK_SIZE = 10;
 	// private int cardsRemain = 0;
 
 	// deck statistics
-	private int numLv3;
-	private int numLv2;
-	private int numLv1;
-	private int numLv0;
-	private int numClimax;
+	private int numChara;
+//	private int numExtra;
 	private int numEvent;
-	private int numSoulTrigger;
-
-	private int numYellow;
-	private int numGreen;
-	private int numRed;
-	private int numBlue;
-
-	private int dmgCount;
+	private int numSet;
+	
+	private boolean hasPartner;
 
 	private ArrayList<Card> cards;
+	private ArrayList<Card> extraCards;
 	private ArrayList<Card> unique;
+	private ArrayList<Card> uniqueExtra;
 	private ArrayList<CardWrapper> cardWrapper;
 	private JFrame frame;
 
@@ -60,7 +55,9 @@ public class Deck {
 	public Deck() {
 		setDeckName("Untitled");
 		cards = new ArrayList<Card>();
+		extraCards = new ArrayList<Card>();
 		unique = new ArrayList<Card>();
+		uniqueExtra = new ArrayList<Card>();
 		shuffledCards = new ArrayList<Card>();
 		cardWrapper = new ArrayList<CardWrapper>();
 		frame = new JFrame();
@@ -69,9 +66,31 @@ public class Deck {
 	// add cards to a deck
 	public boolean addCard(Card referenceCard, boolean verbose) {
 		System.out.println("adding in Deck");
+		ArrayList<Card> deck;
+		ArrayList<Card> uniq;
+		if (referenceCard.getT() != Type.EXTRA) {
+			deck = cards;
+			uniq = unique;
+		} else {
+			deck = extraCards;
+			uniq = uniqueExtra;
+		}
 
 		// check if the deck has max number of cards
-		if (cards.size() < MAX_DECK_SIZE) {
+		if ((referenceCard.getT() != Type.EXTRA && deck.size() < MAX_DECK_SIZE) ||
+			(referenceCard.getT() == Type.EXTRA && deck.size() < MAX_EXTRA_DECK_SIZE)) {
+			
+			// check if deck has a partner card already
+			if (referenceCard.getT() == Type.PARTNER && hasPartner) {
+				if (verbose) {
+					JOptionPane.showMessageDialog(
+							frame,
+							"The deck already has a partner card.", 
+							"Max 1 Partner",
+							JOptionPane.WARNING_MESSAGE);
+				}
+				return false;
+			}
 			boolean toAdd = true;
 			int x = 0;
 			for (; x < cardWrapper.size(); x++) {
@@ -83,42 +102,44 @@ public class Deck {
 
 			if (x == cardWrapper.size()) {
 				CardWrapper newWrapper = new CardWrapper();
-				newWrapper.setCardName(referenceCard.getCardName());
+				newWrapper.setCardName(referenceCard.getName());
 				cardWrapper.add(newWrapper);
 				toAdd = cardWrapper.get(x).addCard(referenceCard);
 			}
 
 			// if not, check to see if there are 4 copies of a card
-			if (cards.contains(referenceCard)) {
+			if (deck.contains(referenceCard)) {
 				// if not, then add
 				// System.err.println(card.getName());
 				if (referenceCard.getCardCount() < Card
 						.getMaxInDeck(referenceCard) && toAdd) {
 					referenceCard.addCount();
-					for (int i = 0; i < cards.size(); i++) {
-						Card tempCard = cards.get(i);
+					for (int i = 0; i < deck.size(); i++) {
+						Card tempCard = deck.get(i);
 						if (referenceCard.compareTo(tempCard) == 0) {
 							tempCard.setCount(referenceCard.getCardCount());
 						}
 					}
 
 					Card card = referenceCard.clone();
-					card.setCardName(card.getCardName());
+					card.setName(card.getName());
 					onlineUpdateStatistics(card, true);
-					cards.add(card);
-					card.setCurrentState(State.FD_STAND);
-					shuffledCards.add(card);
+					deck.add(card);
+					if (card.getT() != Type.EXTRA)
+						shuffledCards.add(card);
+					if (card.getT() == Type.PARTNER)
+						hasPartner = true;
 					// System.err.println(card.toString());
 					return true;
 				} else if (verbose) {
-					System.out.println(referenceCard.getCardName()
+					System.out.println(referenceCard.getName()
 							+ " has maximum copies");
 					// Warn the user that there are 4 copies existing
 					JOptionPane.showMessageDialog(
 							frame,
 							"There are already the maximum copies ("
 									+ Card.getMaxInDeck(referenceCard)
-									+ ") of " + referenceCard.getCardName()
+									+ ") of " + referenceCard.getName()
 									+ " in the deck", "Max Copies",
 							JOptionPane.WARNING_MESSAGE);
 				}
@@ -128,28 +149,31 @@ public class Deck {
 				referenceCard.addCount();
 				Card card = referenceCard.clone();
 				onlineUpdateStatistics(card, true);
-				cards.add(card);
-				shuffledCards.add(card);
-				unique.add(referenceCard);
-				Collections.sort(unique);
+				deck.add(card);
+				if (card.getT() != Type.EXTRA)
+					shuffledCards.add(card);
+				if (card.getT() == Type.PARTNER)
+					hasPartner = true;
+				uniq.add(referenceCard);
+				Collections.sort(uniq);
 
 				return true;
 			} else if (verbose) {
-				System.out.println(referenceCard.getCardName()
+				System.out.println(referenceCard.getName()
 						+ " has maximum copies");
 				// Warn the user that there are 4 copies existing
 				JOptionPane.showMessageDialog(
 						frame,
 						"There are already the maximum copies ("
 								+ Card.getMaxInDeck(referenceCard) + ") of "
-								+ referenceCard.getCardName() + " in the deck",
+								+ referenceCard.getName() + " in the deck",
 						"Max Copies", JOptionPane.WARNING_MESSAGE);
 			}
 		} else if (verbose) {
 			System.out.println("FULL DECK");
 			// Warn the user that it is a full deck
 			JOptionPane.showMessageDialog(frame,
-					"This deck already contain 50 cards!", "Full Deck",
+					"Deck is full!", "Full Deck",
 					JOptionPane.WARNING_MESSAGE);
 		}
 		return false;
@@ -157,8 +181,17 @@ public class Deck {
 
 	// remove a card form the deck
 	public boolean removeCard(Card card) {
+		ArrayList<Card> deck;
+		ArrayList<Card> uniq;
+		if (card.getT() != Type.EXTRA) {
+			deck = cards;
+			uniq = unique;
+		} else {
+			deck = extraCards;
+			uniq = uniqueExtra;
+		}
 		// check to see if the card exists in the deck
-		if (cards.contains(card)) {
+		if (deck.contains(card)) {
 
 			int x = 0;
 			for (; x < cardWrapper.size(); x++) {
@@ -168,23 +201,25 @@ public class Deck {
 			}
 
 			onlineUpdateStatistics(card, false);
-			cards.remove(card);
+			if (card.getT() == Type.PARTNER)
+				hasPartner = false;
+			deck.remove(card);
 			card.removeCount();
-			for (int i = 0; i < cards.size(); i++) {
-				Card tempCard = cards.get(i);
+			for (int i = 0; i < deck.size(); i++) {
+				Card tempCard = deck.get(i);
 				if (card.compareTo(tempCard) == 0) {
 					tempCard.setCount(card.getCardCount());
 				}
-				if (i < unique.size()) {
-					if (unique.get(i).compareTo(card) == 0) {
-						unique.get(i).setCount(card.getCardCount());
+				if (i < uniq.size()) {
+					if (uniq.get(i).compareTo(card) == 0) {
+						uniq.get(i).setCount(card.getCardCount());
 					}
 				}
 			}
-			System.out.println(card.getCardName() + " has "
+			System.out.println(card.getName() + " has "
 					+ card.getCardCount() + " copies");
 			if (card.getCardCount() == 0) {
-				unique.remove(card);
+				uniq.remove(card);
 			}
 			return true;
 		}
@@ -195,9 +230,17 @@ public class Deck {
 	public ArrayList<Card> getCards() {
 		return cards;
 	}
+	
+	public ArrayList<Card> getExtraCards() {
+		return extraCards;
+	}
 
 	public ArrayList<Card> getUnique() {
 		return unique;
+	}
+	
+	public ArrayList<Card> getUniqueExtra() {
+		return uniqueExtra;
 	}
 
 	// public void setCardsRemain(int cardsRemain) {
@@ -227,6 +270,7 @@ public class Deck {
 			objectOutput = new ObjectOutputStream(fileOutput);
 
 			objectOutput.writeObject(cards);
+			objectOutput.writeObject(extraCards);
 			objectOutput.writeObject(shuffledCards);
 
 			objectOutput.close();
@@ -250,6 +294,10 @@ public class Deck {
 					new FileOutputStream(file.getAbsolutePath()), "UTF-8");
 			// FileWriter fw = new FileWriter(file.getAbsolutePath());
 			for (Card c : unique) {
+				for (int i = 0; i < c.getCardCount(); ++i)
+					fw.write(c.getID() + "\n");
+			}
+			for (Card c : uniqueExtra) {
 				for (int i = 0; i < c.getCardCount(); ++i)
 					fw.write(c.getID() + "\n");
 			}
@@ -289,8 +337,12 @@ public class Deck {
 				if (c == null) {
 					while (valueList.hasNext()) {
 						Card temp = valueList.next();
-						if (temp.meetsRequirement(pID, "", null, null, -1, -1,
-								null, -1, -1, "", "")) {
+						if (temp.meetsRequirement(pID,"","",null,"","",
+								Integer.MIN_VALUE,Integer.MAX_VALUE,
+								Integer.MIN_VALUE,Integer.MAX_VALUE,
+								Integer.MIN_VALUE,Integer.MAX_VALUE,
+								Integer.MIN_VALUE,Integer.MAX_VALUE,
+								"","","")) {
 							c = temp;
 						}
 					}
@@ -316,6 +368,7 @@ public class Deck {
 			fileInput = new FileInputStream(file.getAbsolutePath());
 			objectInput = new ObjectInputStream(fileInput);
 			cards = (ArrayList<Card>) objectInput.readObject();
+			extraCards = (ArrayList<Card>) objectInput.readObject();
 			offlineUpdateStatistics();
 			shuffledCards = (ArrayList<Card>) objectInput.readObject();
 			System.out.println("card count: " + shuffledCards.size());
@@ -356,72 +409,32 @@ public class Deck {
 			offset = 1;
 		else
 			offset = -1;
-		switch (c.getLevel()) {
-		case 3:
-			numLv3 += offset;
-			break;
-		case 2:
-			numLv2 += offset;
-			break;
-		case 1:
-			numLv1 += offset;
-			break;
-		case 0:
-			if (c.getT() != Type.CLIMAX)
-				numLv0 += offset;
-			break;
-		default:
-		}
-
-		switch (c.getC()) {
-		case YELLOW:
-			numYellow += offset;
-			break;
-		case GREEN:
-			numGreen += offset;
-			break;
-		case RED:
-			numRed += offset;
-			break;
-		case BLUE:
-			numBlue += offset;
-			break;
-		default:
-		}
 
 		switch (c.getT()) {
-		case CLIMAX:
-			numClimax += offset;
+		case CHARA:
+		case PARTNER:
+			numChara += offset;
 			break;
+			/*
+		case EXTRA:
+			numExtra += offset;
+			break;
+			*/
 		case EVENT:
 			numEvent += offset;
 			break;
-		default:
-		}
-
-		switch (c.getTrigger()) {
-		case DUALSOUL:
-			numSoulTrigger += offset;
-		case SOUL:
-		case SOULWIND:
-		case SOULFLAME:
-			numSoulTrigger += offset;
+		case SET:
+			numSet += offset;
 			break;
 		default:
 		}
-
-		dmgCount += c.getSoul();
 	}
 
 	private void offlineUpdateStatistics() {
-		numLv3 = 0;
-		numLv2 = 0;
-		numLv1 = 0;
-		numLv0 = 0;
-		numClimax = 0;
+		numChara = 0;
+//		numExtra = 0;
 		numEvent = 0;
-		numSoulTrigger = 0;
-		dmgCount = 0;
+		numSet = 0;
 		for (Card c : cards) {
 			onlineUpdateStatistics(c, true);
 		}
@@ -432,62 +445,27 @@ public class Deck {
 		return cards.size();
 	}
 
-	public int getNumLevel3() {
-		return numLv3;
+	public int getNumChara() {
+		return numChara;
 	}
 
-	public int getNumLevel2() {
-		return numLv2;
-	}
-
-	public int getNumLevel1() {
-		return numLv1;
-	}
-
-	public int getNumLevel0() {
-		return numLv0;
-	}
-
-	public int getNumClimax() {
-		return numClimax;
+	public int getNumExtra() {
+		return extraCards.size();
 	}
 
 	public int getNumEvent() {
 		return numEvent;
 	}
-
-	public int getNumSoul() {
-		return numSoulTrigger;
-	}
-
-	public int getNumYellow() {
-		return numYellow;
-	}
-
-	public int getNumGreen() {
-		return numGreen;
-	}
-
-	public int getNumRed() {
-		return numRed;
-	}
-
-	public int getNumBlue() {
-		return numBlue;
-	}
-
-	public int getDamage() {
-		return dmgCount;
+	
+	public int getNumSet() {
+		return numSet;
 	}
 
 	public void printStatistics() {
 		System.out.println("# cards:" + getNumCards());
-		System.out.println("# LV3:" + getNumLevel3());
-		System.out.println("# LV2:" + getNumLevel2());
-		System.out.println("# LV1:" + getNumLevel1());
-		System.out.println("# LV0:" + getNumLevel0());
-		System.out.println("# Climax:" + getNumClimax());
-		System.out.println("# Event:" + getNumClimax());
-		System.out.println("# Soul Triggers:" + getNumSoul());
+		System.out.println("# Chara:" + getNumChara());
+		System.out.println("# Extra:" + getNumExtra());
+		System.out.println("# Event:" + getNumEvent());
+		System.out.println("# Set:" + getNumSet());
 	}
 }

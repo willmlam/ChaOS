@@ -9,7 +9,7 @@
 package CardAssociation;
 
 public enum Type {
-	ALL(""), CLIMAX("Climax"), CHARACTER("Character"), EVENT("Event");
+	ALL(""), PARTNER("Partner"), CHARA("Chara"), EXTRA("Extra"), EVENT("Event"), SET("Set");
 
 	String s;
 
@@ -25,12 +25,14 @@ public enum Type {
     	switch(this) {
 	    	case ALL:
 	    		return 0;
-	    	case CLIMAX:
+	    	case CHARA:
 	    		return 1;
-	    	case CHARACTER:
+	    	case EXTRA:
 	    		return 2;
 	    	case EVENT:
 	    		return 3;
+	    	case SET:
+	    		return 4;
 	    	default:
     			return 255;
     	}
