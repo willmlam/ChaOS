@@ -1,0 +1,8 @@
+Changelog:
+04/29/2013 (ChaOS-DB Beta 1.0.0)
+- Initial release with all cards accessible from the official DB
+
+====================
+
+Credits:
+William Lam - Adapted from WSDB (written by Frank Chen and William Lam).
