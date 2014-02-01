@@ -382,8 +382,8 @@ public class BuilderGUI extends JFrame {
 		nameSearch.addKeyListener(searchFieldListener);
 		raritySearch.addKeyListener(searchFieldListener);
 		minAttackSearch.addKeyListener(searchFieldListener);
-		minAttackSearch.addKeyListener(searchFieldListener);
-		maxDefenseSearch.addKeyListener(searchFieldListener);
+		maxAttackSearch.addKeyListener(searchFieldListener);
+		minDefenseSearch.addKeyListener(searchFieldListener);
 		maxDefenseSearch.addKeyListener(searchFieldListener);
 		minAttackCompSearch.addKeyListener(searchFieldListener);
 		maxAttackCompSearch.addKeyListener(searchFieldListener);
@@ -1069,7 +1069,7 @@ public class BuilderGUI extends JFrame {
 		};
 
 		deckListTable
-				.setPreferredScrollableViewportSize(new Dimension(775, 175));
+				.setPreferredScrollableViewportSize(new Dimension(750, 175));
 		deckListTable.setFillsViewportHeight(true);
 		deckListTable.setRowSorter(new LinkedTableRowSorter<TableModel>(deckListTable
 				.getModel(),this));
@@ -1101,7 +1101,7 @@ public class BuilderGUI extends JFrame {
 					int row = deckListTable.getSelectedRow();
 					if (row > -1) {
 						selectedCard = cardHolder.get(deckListTable.getValueAt(
-								row, 1));
+								row, 1).toString().split(" ")[0]);
 						// selectedCard = allCards.get(row);
 					}
 					refresh("deckListSelect");
@@ -1284,7 +1284,7 @@ public class BuilderGUI extends JFrame {
 		};
 
 		extraDeckListTable
-				.setPreferredScrollableViewportSize(new Dimension(775, 175));
+				.setPreferredScrollableViewportSize(new Dimension(750, 175));
 		extraDeckListTable.setFillsViewportHeight(true);
 		extraDeckListTable.setRowSorter(new TableRowSorter<TableModel>(extraDeckListTable
 				.getModel()));
@@ -1603,12 +1603,8 @@ public class BuilderGUI extends JFrame {
 		Box vbox = Box.createVerticalBox();
 		vbox.setAlignmentX(Box.LEFT_ALIGNMENT);
 
+		int cards = 0;
 		for (int i = 0; i < deckListModel.getRowCount(); i++) {
-			if (i % DECKPERLINE == 0 && i > 0) {
-				vbox.add(box);
-				box = Box.createHorizontalBox();
-				box.setAlignmentX(Box.LEFT_ALIGNMENT);
-			}
 			int qty = (Integer) deckListTable.getValueAt(i, 0);
 			final Card thisCard = cardHolder.get(deckListTable.getValueAt(i, 1).toString().split(" ")[0]);
 			for (int j = 0; j < qty; ++j) {
@@ -1630,6 +1626,11 @@ public class BuilderGUI extends JFrame {
 	
 				tempLab.addMouseListener(listener);
 				box.add(tempLab);
+				if (++cards % DECKPERLINE == 0 && cards > 0) {
+					vbox.add(box);
+					box = Box.createHorizontalBox();
+					box.setAlignmentX(Box.LEFT_ALIGNMENT);
+				}
 			}
 
 		}
@@ -1639,11 +1640,6 @@ public class BuilderGUI extends JFrame {
 		box = Box.createHorizontalBox();
 		box.setAlignmentX(Box.LEFT_ALIGNMENT);
 		for (int i = 0; i < extraDeckListModel.getRowCount(); i++) {
-			if (i % DECKPERLINE == 0 && i > 0) {
-				vbox.add(box);
-				box = Box.createHorizontalBox();
-				box.setAlignmentX(Box.LEFT_ALIGNMENT);
-			}
 			int qty = (Integer) extraDeckListTable.getValueAt(i, 0);
 			final Card thisCard = cardHolder.get(extraDeckListTable.getValueAt(i, 1).toString().split(" ")[0]);
 			for (int j = 0; j < qty; ++j) {

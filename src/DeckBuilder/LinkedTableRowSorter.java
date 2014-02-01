@@ -10,11 +10,12 @@ public class LinkedTableRowSorter<M extends TableModel> extends TableRowSorter<M
 		this.gui = gui;
 	}
 	
+	/*
 	@Override
 	public void sort() {
 		super.sort();
-		gui.refresh("deckThumbs");
 	}
+	*/
 	
 	@Override
 	public void toggleSortOrder(int column) {

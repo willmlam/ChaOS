@@ -17,7 +17,7 @@ public class StatCompCellRenderer extends DefaultTableCellRenderer {
 				setText("+" + val.toString());
 			}
 			else {
-				setText(val.toString());
+				setText("-" + -val.intValue());
 			}
 		}
 	}

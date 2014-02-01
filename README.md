@@ -1,4 +1,4 @@
-Weiss_Schwarz
-=============
+Chaos Deck Builder
+==================
 
-Weiss Schwarz Virtual Player
+Adapted from the Weiss_Schwarz branch.

@@ -38,6 +38,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.TransferHandler;
 
 public class Card implements Serializable, MouseListener, MouseMotionListener, Comparable<Object>, Transferable {
@@ -308,14 +309,19 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 		description.setCaretPosition(0);
 		JScrollPane descContainer = new JScrollPane(description);
 
-		JLabel nameLabel = new JLabel(name);
+		JTextField nameLabel = new JTextField(name);
+		nameLabel.setEditable(false);
 		// nameLabel.setFont(font);
-		JLabel idLabel = new JLabel(id + " " + rarity);
+		JTextField idLabel = new JTextField(id + " " + rarity);
+		idLabel.setEditable(false);
 		// idLabel.setFont(font);
-		JLabel typeLabel = new JLabel(t.toString());
+		JTextField typeLabel = new JTextField(t.toString());
+		typeLabel.setEditable(false);
 		// typeLabel.setFont(font);
-		JLabel genderTextLabel = new JLabel("Gender:  " + gender);
-		JLabel elementTextLabel = new JLabel("Element:  " + element);
+		JTextField genderTextLabel = new JTextField("Gender:  " + gender);
+		genderTextLabel.setEditable(false);
+		JTextField elementTextLabel = new JTextField("Element:  " + element);
+		elementTextLabel.setEditable(false);
 		String attackString = "" + (attack >= 0 ? String.valueOf(attack) : "-");
 		String defenseString = "" + (defense >= 0 ? String.valueOf(defense) : "-");
 		String attackCompString;
@@ -332,42 +338,38 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 		}
 		JLabel attackTextLabel = new JLabel("ATK:");
 		JLabel defenseTextLabel = new JLabel("DEF:");
-		JLabel attackLabel = new JLabel(attackString);
-		attackLabel.setHorizontalAlignment(JLabel.RIGHT);
-		JLabel defenseLabel = new JLabel(defenseString);
-		defenseLabel.setHorizontalAlignment(JLabel.RIGHT);
-		JLabel attackCompLabel = new JLabel(attackCompString);
-		attackCompLabel.setHorizontalAlignment(JLabel.RIGHT);
-		JLabel defenseCompLabel = new JLabel(defenseCompString);
-		defenseCompLabel.setHorizontalAlignment(JLabel.RIGHT);
+		JLabel attackLabel = new JLabel(attackString,JLabel.RIGHT);
+		JLabel defenseLabel = new JLabel(defenseString,JLabel.RIGHT);
+		JLabel attackCompLabel = new JLabel(attackCompString,JLabel.RIGHT);
+		JLabel defenseCompLabel = new JLabel(defenseCompString,JLabel.RIGHT);
 		
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
 		
-		Component spacer = Box.createHorizontalStrut(15);
+		Component spacer = Box.createHorizontalStrut(0);
 		
 		GroupLayout.ParallelGroup hGroup = layout.createParallelGroup();
 		hGroup
 			.addComponent(nameLabel)
 			.addGroup(layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup()
-						.addComponent(idLabel,GroupLayout.PREFERRED_SIZE,100,GroupLayout.PREFERRED_SIZE)
-						.addComponent(genderTextLabel,GroupLayout.PREFERRED_SIZE,100,GroupLayout.PREFERRED_SIZE))
+						.addComponent(idLabel,GroupLayout.PREFERRED_SIZE,118,GroupLayout.PREFERRED_SIZE)
+						.addComponent(genderTextLabel,GroupLayout.PREFERRED_SIZE,118,GroupLayout.PREFERRED_SIZE))
 				.addGroup(layout.createParallelGroup()
-						.addComponent(typeLabel)
-						.addComponent(elementTextLabel,GroupLayout.PREFERRED_SIZE,90,GroupLayout.PREFERRED_SIZE))
+						.addComponent(typeLabel,GroupLayout.PREFERRED_SIZE,105,GroupLayout.PREFERRED_SIZE)
+						.addComponent(elementTextLabel,GroupLayout.PREFERRED_SIZE,105,GroupLayout.PREFERRED_SIZE))
 				.addGroup(layout.createParallelGroup()
-						.addComponent(attackTextLabel))
+						.addComponent(attackTextLabel,GroupLayout.PREFERRED_SIZE,30,GroupLayout.PREFERRED_SIZE))
 				.addGroup(layout.createParallelGroup()
-						.addComponent(attackLabel,GroupLayout.PREFERRED_SIZE,15,GroupLayout.PREFERRED_SIZE)
-						.addComponent(attackCompLabel,GroupLayout.PREFERRED_SIZE,15,GroupLayout.PREFERRED_SIZE))
+						.addComponent(attackLabel,GroupLayout.PREFERRED_SIZE,18,GroupLayout.PREFERRED_SIZE)
+						.addComponent(attackCompLabel,GroupLayout.PREFERRED_SIZE,18,GroupLayout.PREFERRED_SIZE))
 				.addGroup(layout.createParallelGroup()
 						.addComponent(spacer))
 				.addGroup(layout.createParallelGroup()
-						.addComponent(defenseTextLabel))
+						.addComponent(defenseTextLabel,GroupLayout.PREFERRED_SIZE,28,GroupLayout.PREFERRED_SIZE))
 				.addGroup(layout.createParallelGroup()
-						.addComponent(defenseLabel,GroupLayout.PREFERRED_SIZE,15,GroupLayout.PREFERRED_SIZE)
-						.addComponent(defenseCompLabel,GroupLayout.PREFERRED_SIZE,15,GroupLayout.PREFERRED_SIZE))
+						.addComponent(defenseLabel,GroupLayout.PREFERRED_SIZE,18,GroupLayout.PREFERRED_SIZE)
+						.addComponent(defenseCompLabel,GroupLayout.PREFERRED_SIZE,18,GroupLayout.PREFERRED_SIZE))
 						)
 			.addComponent(descContainer);
 //			);

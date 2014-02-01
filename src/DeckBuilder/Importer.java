@@ -245,6 +245,9 @@ public class Importer {
 			else {
 				c.setAttack(st.columnInt(fieldMap.get("attack")));
 				c.setDefense(st.columnInt(fieldMap.get("defense")));
+			}
+			
+			if (c.getT() != Type.EVENT) {
 				c.setAttackComp(st.columnInt(fieldMap.get("attackcomp")));
 				c.setDefenseComp(st.columnInt(fieldMap.get("defensecomp")));
 			}
