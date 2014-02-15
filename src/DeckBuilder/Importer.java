@@ -261,6 +261,7 @@ public class Importer {
 				c.setImageResource("/resources/cardimages/chaos_00.jpg");	
 			}
 			else {
+				if (setid.equals("VA")) setid="va";
 				c.setImageResource("/resources/cardimages/" + setid + "/" + imagefilename);
 			}
 			if (!new File("src" + c.getImageResource()).exists()) {
