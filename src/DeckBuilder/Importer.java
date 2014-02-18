@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.regex.Pattern;
-
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.almworks.sqlite4java.SQLiteStatement;
@@ -33,7 +31,6 @@ public class Importer {
 	private static ArrayList<Card> setCards = new ArrayList<Card>();
 	private static HashMap<String, Card> allCards = new HashMap<String, Card>();
 	private Writer nameDict;
-	private Scanner scanner;
 	private static Scanner s;
 
 	public Importer() {
@@ -43,91 +40,6 @@ public class Importer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	// parsing the given file to fill setCards and allCards
-	/*
-	 * public void scan(File file) {
-	 * 
-	 * try { Scanner scanner = new Scanner(file); scanner.nextLine();
-	 * 
-	 * while (scanner.hasNext()) { Scanner lineScan = new
-	 * Scanner(scanner.nextLine()) .useDelimiter(";");
-	 * 
-	 * String cardId = lineScan.next(); String rarity = lineScan.next(); String
-	 * name = lineScan.next(); String color = lineScan.next(); String side =
-	 * lineScan.next(); String cardType = lineScan.next(); int level =
-	 * lineScan.nextInt(); int cost = lineScan.nextInt(); int power =
-	 * lineScan.nextInt(); int soul = lineScan.nextInt(); String trait1 =
-	 * lineScan.next(); String trait2 = lineScan.next(); String trigger =
-	 * lineScan.next();
-	 * 
-	 * Card card = new Card(cardId, name); card.setCost(cost); //
-	 * card.setDamage(damage) card.setLevel(level); card.setPower(power);
-	 * card.setSoul(soul); card.setTrait1(trait1); card.setTrait2(trait2);
-	 * 
-	 * System.out.println(trigger);
-	 * card.setTrigger(Trigger.convertString(trigger));
-	 * 
-	 * if (color.equalsIgnoreCase("red")) { card.setC(CCode.RED); } else if
-	 * (color.equalsIgnoreCase("blue")) { card.setC(CCode.BLUE); } else if
-	 * (color.equalsIgnoreCase("yellow")) { card.setC(CCode.YELLOW); } else if
-	 * (color.equalsIgnoreCase("green")) { card.setC(CCode.GREEN); }
-	 * 
-	 * if (cardType.equalsIgnoreCase("character")) { card.setT(Type.CHARACTER);
-	 * } else if (cardType.equalsIgnoreCase("event")) { card.setT(Type.EVENT); }
-	 * else if (cardType.equalsIgnoreCase("climax")) { card.setT(Type.CLIMAX); }
-	 * 
-	 * String textFlavor = lineScan.next(); String cardEffect = lineScan.next();
-	 * card.setFlavorText(textFlavor); card.addEffect(cardEffect);
-	 * 
-	 * String imageName = lineScan.next();
-	 * 
-	 * card.setImage(new File("WS-AB150px/" + imageName));
-	 * 
-	 * Card c = allCards.put(name, card); if (c == null) { // new card
-	 * setCards.add(card); } else { card.setID(cardId); //allCards.put(name,
-	 * card); }
-	 * 
-	 * // System.out.println(trigger); }
-	 * 
-	 * } catch (FileNotFoundException e) { System.out.println("File Not Found");
-	 * }
-	 * 
-	 * for (int i = 0; i < setCards.size(); i++) { //
-	 * System.out.println(setCards.get(i).toString()); }
-	 * 
-	 * serializingLists(); }
-	 */
-
-
-	private String rename(String str) throws IOException {
-		String resultString = str.charAt(0) + "";
-		String testResultString = str.charAt(0) + "";
-		String regex1 = "[^a-zA-Z]*[a-zA-Z0-9\\p{Punct}\\s]*[^a-zA-Z0-9\\p{Punct}[\\s]]+[^a-zA-Z\\s0-9\"]+$";
-		String regex2 = "[^a-zA-Z]+[a-zA-Z0-9\\p{Punct}\\s]*[^a-zA-Z0-9[\\s]\"]+$";
-		String regex3 = "[a-zA-Z0-9\\p{Punct}\\s]+$";
-
-		if (Pattern.matches(regex1, str) || Pattern.matches(regex2, str)
-				|| Pattern.matches(regex3, str) || str.contains("Rock Cannon")) {
-			return str;
-		}
-
-		do {
-			str = str.replace("  ", " ");
-		} while (str.contains("  "));
-
-		for (int i = 1; i < str.length(); i++) {
-
-			testResultString += str.charAt(i);
-			if (Pattern.matches(regex1, testResultString))
-				resultString = testResultString;
-		}
-		resultString = resultString.trim();
-		if (!resultString.equals(str)) {
-			nameDict.write("[" + str + "  =>  " + resultString + "]\n");
-		}
-		return resultString;
 	}
 
 	private void close() {

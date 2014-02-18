@@ -8,26 +8,19 @@
 
 package CardAssociation;
 
-import java.awt.Canvas;
-import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.UUID;
-import java.awt.Component;
 
 import javax.imageio.ImageIO;
 import javax.swing.Box;
@@ -92,7 +85,6 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 
 	// other properties
 	private String imageResource;
-	private String backResource;
 	private DataFlavor[] flavors;
 	private int MINILEN = 3;
 
@@ -193,7 +185,6 @@ public class Card implements Serializable, MouseListener, MouseMotionListener, C
 		flavorText_e = "";
 		// imageFile = new File("FieldImages/cardBack-s.jpg");
 		imageResource = "/resources/FieldImages/cardBack-s.jpg";
-		backResource = "/resources/FieldImages/cardBack-s.jpg";
 		setAssociatedCards(new ArrayList<Card>());
 		setAttributes(new ArrayList<Attribute>());
 		// addMouseListener(this);
